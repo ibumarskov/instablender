@@ -1,72 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import os
-import json
-
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.page import Page
-from facebook_business.adobjects.shadowigmedia import ShadowIGMedia
-
+from prettytable import PrettyTable
+from lib.instablender import InstaBlenderMedia
 
 my_app_id = os.environ.get('MY_APP_ID')
 my_app_secret = os.environ.get('MY_APP_SECRET')
 my_access_token = os.environ.get('MY_ACCESS_TOKEN')
 
-FacebookAdsApi.init(my_app_id, my_app_secret, my_access_token)
+ig_post = InstaBlenderMedia(my_access_token, my_app_id, my_app_secret,
+                            media_id=17869431460292915)
+pass_list, deny_list = ig_post.filter_by_rule()
+table = PrettyTable(["Num", "User", "Comment"])
+for i in range(len(pass_list)):
+    table.add_row([i, pass_list[i]['username'], pass_list[i]['text']])
+print "=== Pass list ==="
+print table.get_string()
 
-
-def get_instagram_business_id():
-    fields = [
-        'instagram_business_account',
-    ]
-    params = {
-    }
-    accounts = Page('me/accounts').api_get(
-        fields=fields,
-        params=params,
-    )
-    for acc in  accounts["data"]:
-        if "instagram_business_account" in acc:
-            return acc["instagram_business_account"]["id"]
-
-def get_media_id_by_text(acc_id, text):
-    fields = [
-        'caption',
-    ]
-    params = {
-    }
-    media = Page(acc_id + '/media').api_get(
-        fields=fields,
-        params=params,
-    )
-    for m in media["data"]:
-        print m["id"]
-        if text in m["caption"]:
-            return m["id"]
-
-
-def get_comments(media_id, next=None, clist=[]):
-    fields = [
-        "text", "username"
-    ]
-    params = {
-        "limit": 50,
-        "after": next,
-    }
-    comments = Page(str(media_id) + '/comments').api_get(
-        fields=fields,
-        params=params,
-    )
-
-    if "paging" in comments:
-        return clist + get_comments(media_id, next=comments["paging"]["cursors"]["after"], clist=comments["data"])
-    else:
-        return clist + comments["data"]
-
-
-acc_id = get_instagram_business_id()
-media_id = get_media_id_by_text(acc_id, "some_text")  # 17869431460292915
-ig_comments = get_comments(media_id)
-for i in ig_comments:
-    print i
-print len(ig_comments)
+table = PrettyTable(["Num", "User", "Comment"])
+for i in range(len(deny_list)):
+    table.add_row([i, deny_list[i]['username'], deny_list[i]['text'][:50]])
+print "=== Deny list ==="
+print table.get_string()
