@@ -83,7 +83,8 @@ class InstaBlenderMedia(InstaBlender):
     def _check_unique_mentioned_users(self, comments):
         sortedlist = sorted(comments, key=itemgetter('username'))
         current_user = None
-        deny_list =[]
+        pass_list_id = []
+        deny_list_id = []
         for i in range(len(sortedlist)):
             if current_user != sortedlist[i]['username']:
                 current_user = sortedlist[i]['username']
@@ -91,9 +92,20 @@ class InstaBlenderMedia(InstaBlender):
             u = self._get_mentioned_users(sortedlist[i])
             if len(userlist+u) == len(set(userlist+u)):
                 userlist.extend(u)
+                pass_list_id.append(sortedlist[i]['id'])
             else:
-                deny_list.append(sortedlist[i])
-        return sortedlist, deny_list
+                deny_list_id.append(sortedlist[i]['id'])
+        p, d = self._filter_by_id(deny_list_id, comments)
+        return p, d
+
+    def _filter_by_id(self, deny_list_id, comments):
+        filtered = []
+        for i in deny_list_id:
+            for c in range(len(comments)):
+                if i == comments[c]['id']:
+                    filtered.append(comments.pop(c))
+                    break
+        return comments, filtered
 
     def filter_by_rule(self):
         comments = self.get_comments()
@@ -104,6 +116,6 @@ class InstaBlenderMedia(InstaBlender):
                 deny_list.append(c)
             else:
                 pass_list.append(c)
-        pass_list, d = self._check_unique_mentioned_users(pass_list)
+        p, d = self._check_unique_mentioned_users(pass_list)
         deny_list.extend(d)
         return pass_list, deny_list

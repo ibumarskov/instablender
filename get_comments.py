@@ -7,9 +7,10 @@ from lib.instablender import InstaBlenderMedia
 my_app_id = os.environ.get('MY_APP_ID')
 my_app_secret = os.environ.get('MY_APP_SECRET')
 my_access_token = os.environ.get('MY_ACCESS_TOKEN')
+media_id = os.environ.get('MEDIA_ID')
 
 ig_post = InstaBlenderMedia(my_access_token, my_app_id, my_app_secret,
-                            media_id=17869431460292915)
+                            media_id=media_id)
 pass_list, deny_list = ig_post.filter_by_rule()
 table = PrettyTable(["Num", "User", "Comment"])
 for i in range(len(pass_list)):
